@@ -1,4 +1,5 @@
 import random
+from math import inf as infinity
 
 def get_free_cells(board):
     """Get the cells that are playable
@@ -22,12 +23,13 @@ def get_random_move(board, player_number):
     Returns:
         int -- A free cell
     """
-
+    
     ## ----- TODO : Get a random move from the list of available cells ----- ##
-    pass
+    freeCells = get_free_cells(board)
+    return random.choice(freeCells)
     ## --------------------------------------------------------------------- ##
 
-def get_smart_move(board, player_number):
+def get_smart_move(board, depth, player_number):
     """Apply the min-max algorithm or another smart one to find next move
     
     Arguments:
@@ -35,8 +37,27 @@ def get_smart_move(board, player_number):
         player_number {int} -- Player
     """
 
-    ## ----- TODO : Use the minmax algorithm or another smart one to find the best move ----- ## 
-    pass
+    ## ----- TODO: Use the minmax algorithm or another smart one to find the best move ----- ##
+    if player_number == 1:
+    	best = [-1, -1, -infinity]
+    else:
+        best = [-1, -1, +infinity]
+
+    for cell in get_free_cells(board):
+        x, y = cell[0], cell[1]
+        board[x][y] = player_number
+        score = get_smart_move(board, depth - 1, -player_number)
+        board[x][y] = 0
+        score[0], score[1] = x, y
+
+        if player_number == 1:
+            if score[2] > best[2]:
+                best = score  # max value
+        else:
+            if score[2] < best[2]:
+                best = score  # min value
+    
+    return best
     ##------------------------------------------------------------------------------------##
 
 def find_winner(b1):

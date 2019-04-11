@@ -5,7 +5,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 ## ----- TODO : Change this with your instance ip address ----- ##
-URL = "http://34.244.201.243:5001/board"
+URL = "http://ec2-34-242-143-111.eu-west-1.compute.amazonaws.com:5001/board"
 ## ------------------------------------------------------------ ##
 
 def cell_slot_to_number(cell_slot):
@@ -35,7 +35,15 @@ def cell_number_to_slot(cell_number):
 def handle_play(event):
     ## ----- TODO : Build the application logic with the backend and answer to the user ----- ##
     cell = event['currentIntent']['slots']["Cell"]  # Something similar to get the cell told by the user (You should change "Cell" by the name of your slot)
-    message = "handle_play function not implemented yet."
+    cell_number = cell_slot_to_number(cell)
+    
+    params = {"move": cell_number}
+    r = requests.put(URL, params=params)
+    message = r.text
+    res = r.json()
+    print(res["winner"], res, r.text)
+    
+    #message = res['winner'] if res['winner'] != null else cell_number_to_slot(res['computer_move'])
     ## -------------------------------------------------------------------------------------- ##
     
     return {
@@ -52,7 +60,20 @@ def handle_play(event):
     
 def handle_restart(event):
     ## ----- TODO : Restart the game and answer to the user ----- ##
-    pass
+    r = requests.delete(URL)
+    message = "Game started !" if r.status_code == 200 else "Error occured"
+    
+    return {
+        'sessionAttributes': event['sessionAttributes'],
+        'dialogAction': {
+            'type': 'Close',
+            'fulfillmentState': 'Fulfilled',
+            'message': {
+                'contentType': 'PlainText',
+                'content': message
+            }
+        }
+    }
     ## ---------------------------------------------------------- ##
 
 def handle_default(event):
@@ -80,9 +101,9 @@ def lambda_handler(event, context):
     logger.debug('intentName={}'.format(event['currentIntent']['name']))
 
     ## ----- TODO :  Change the checks by those of your intents ----- ##
-    if event['currentIntent']['name'] == "CellToPlay":
+    if event['currentIntent']['name'] == "FLD_CellToPlay":
         return handle_play(event)
-    elif event['currentIntent']['name'] == "RestartGame":
+    elif event['currentIntent']['name'] == "FLD_RestartGame":
         return handle_restart(event)
     ## -------------------------------------------------------------- ##
     else:

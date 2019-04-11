@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
-
-from common.play import *
+from play import *
 
 PLAYER = 0
 COMPUTER = 1
@@ -35,14 +34,14 @@ class Board(Resource):
         free_cells = get_free_cells(self.board)
         player_move = None
         computer_move = None
-
-        # Player plays
+        depth = len(free_cells)
+	# Player plays
         if int(args.move) in free_cells:  # TODO Send an error code
             player_move = int(args.move)
             self.board[player_move] = PLAYER
 
             # Computer plays
-            computer_move = get_random_move(self.board, COMPUTER)
+            computer_move = get_random_move(self.board, depth, COMPUTER)
             if computer_move is not None:
                 self.board[computer_move] = COMPUTER
 
